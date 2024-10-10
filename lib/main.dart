@@ -1,7 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertest/firebase_options.dart';
 import 'package:fluttertest/views/home.dart';
+import 'package:fluttertest/views/login.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -17,7 +25,6 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyWidget(),
-      routes: {'home': (context) => HomePage()},
     );
   }
 }
@@ -30,89 +37,17 @@ class MyWidget extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<MyWidget> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Login',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.black,
-      ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            Spacer(),
-            Text(
-              'Login',
-              style: TextStyle(fontSize: 28),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: TextFormField(
-                controller: emailController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Email é obrigatório';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.person),
-                  label: Text('Email'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: TextFormField(
-                controller: passwordController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Senha é obrigatória';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.lock),
-                  label: Text('Senha'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(
-                      Colors.black), // Define a cor de fundo do botão
-                ),
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    Navigator.pushNamed(context, 'home');
-                  }
-                },
-                child: const Text(
-                  'Entrar',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            Spacer(flex: 2)
-          ],
-        ),
-      ),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.userChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return HomePage(user: snapshot.data!);
+        } else {
+          return LoginPage();
+        }
+      },
     );
   }
 }

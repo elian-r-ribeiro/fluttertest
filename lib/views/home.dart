@@ -1,7 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertest/services/authService.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final User user;
+
+  HomePage({super.key, required this.user});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -25,17 +29,23 @@ class _HomePageState extends State<HomePage> {
             UserAccountsDrawerHeader(
               decoration: BoxDecoration(color: Colors.black),
               accountName: Text(
-                'Elian',
+                widget.user.displayName != null
+                    ? widget.user.displayName!
+                    : "Não informado",
                 style: TextStyle(fontSize: 24),
               ),
-              accountEmail: Text('elianrodriguesribeiro@gmail.com'),
+              accountEmail: Text(widget.user.email != null
+                  ? widget.user.email!
+                  : "Não informado"),
             ),
             ListTile(
               title: Text(
                 'Sair',
                 style: TextStyle(fontSize: 17),
               ),
-              onTap: () {},
+              onTap: () {
+                AuthService().logoutUser();
+              },
               leading: Icon(
                 Icons.exit_to_app,
                 size: 28,
