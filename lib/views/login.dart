@@ -90,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                             context: context, title: erro, isError: true);
                       }
                     });
-                    Navigator.pushNamed(context, 'home');
+                    //Navigator.pushNamed(context, 'home');
                   }
                 },
                 child: const Text(

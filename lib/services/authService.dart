@@ -24,7 +24,10 @@ class AuthService {
           email: email, password: password);
       return null;
     } on FirebaseAuthException catch (e) {
+      print(e.message);
       if (e.message == 'invalid-credential') {
+        return 'Email ou senha incorreto!';
+      } else if (e.message == 'The email address is badly formatted.') {
         return 'Email ou senha incorreto!';
       } else {
         return 'Erro de login';
