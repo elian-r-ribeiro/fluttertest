@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertest/services/authService.dart';
-import 'package:fluttertest/widgets/snack_bar_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,6 +13,8 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   AuthService _authService = AuthService();
+
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(12),
               child: TextFormField(
                 controller: passwordController,
+                obscureText: !_isPasswordVisible,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Senha é obrigatória';
@@ -65,6 +67,18 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                   label: Text('Senha'),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -76,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(12),
               child: ElevatedButton(
                 style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Colors.black),
+                  backgroundColor: MaterialStateProperty.all(Colors.black),
                 ),
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
@@ -86,11 +100,25 @@ class _LoginPageState extends State<LoginPage> {
                         .loginUser(email: email, password: password)
                         .then((erro) {
                       if (erro != null) {
-                        snackBarWidget(
-                            context: context, title: erro, isError: true);
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Erro'),
+                              content: Text(erro),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       }
                     });
-                    //Navigator.pushNamed(context, 'home');
                   }
                 },
                 child: const Text(
@@ -101,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, 'register');
+                Navigator.pushNamed(context, 'registerPage');
               },
               child: const Text(
                 'Criar uma conta',
@@ -110,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, 'passwordrecover');
+                Navigator.pushNamed(context, 'passwordRecover');
               },
               child: const Text(
                 'Esqueci minha senha',

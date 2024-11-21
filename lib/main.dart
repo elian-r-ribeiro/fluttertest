@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertest/firebase_options.dart';
 import 'package:fluttertest/views/home.dart';
 import 'package:fluttertest/views/login.dart';
+import 'package:fluttertest/views/passwordRecover.dart';
+import 'package:fluttertest/views/register.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +27,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyWidget(),
+      routes: {
+        'registerPage': (context) => const RegisterPage(),
+        'passwordRecover': (context) => const PasswordRecoverPage(),
+      },
     );
   }
 }

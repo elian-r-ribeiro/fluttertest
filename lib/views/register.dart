@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertest/services/authService.dart';
-import 'package:fluttertest/widgets/snack_bar_widget.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -15,6 +14,29 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   AuthService _authService = AuthService();
+
+  bool _obscureText = true;
+
+  void _showDialog(String title, String message, bool isError) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+          backgroundColor: isError ? Colors.red[100] : Colors.green[100],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
               padding: const EdgeInsets.all(12),
               child: TextFormField(
                 controller: passwordController,
+                obscureText: _obscureText,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Senha é obrigatória';
@@ -85,6 +108,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 },
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
                   label: Text('Senha'),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -96,7 +129,7 @@ class _RegisterPageState extends State<RegisterPage> {
               padding: const EdgeInsets.all(12),
               child: ElevatedButton(
                 style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Colors.black),
+                  backgroundColor: MaterialStateProperty.all(Colors.black),
                 ),
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
@@ -109,13 +142,10 @@ class _RegisterPageState extends State<RegisterPage> {
                             name: name, email: email, password: password)
                         .then((value) {
                       if (value != null) {
-                        snackBarWidget(
-                            context: context, title: value, isError: true);
+                        _showDialog('Erro', value, true);
                       } else {
-                        snackBarWidget(
-                            context: context,
-                            title: 'Cadastro efetuado com sucesso',
-                            isError: false);
+                        _showDialog(
+                            'Sucesso', 'Cadastro efetuado com sucesso', false);
                       }
                     });
                   }

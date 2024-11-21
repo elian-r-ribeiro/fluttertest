@@ -21,7 +21,12 @@ class _HomePageState extends State<HomePage> {
   Firebaseservice _firebaseservice = Firebaseservice();
 
   void _openModalForm({String? docId}) async {
-    if (docId != null) {
+    if (docId == null) {
+      _manufacturerController.clear();
+      _modelController.clear();
+      _yearController.clear();
+      _categoryController.clear();
+    } else {
       DocumentSnapshot document = await _firebaseservice.getCar(docId);
       Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
@@ -31,107 +36,109 @@ class _HomePageState extends State<HomePage> {
       _categoryController.text = data["category"];
     }
 
-    showModalBottomSheet(
-        backgroundColor: Colors.grey,
-        context: context,
-        isScrollControlled: true,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-        builder: (BuildContext context) {
-          return Padding(
-            padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 16,
-                right: 16,
-                top: 16),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            docId == null ? "Adicionar carro" : "Editar carro",
+            style: TextStyle(fontSize: 20),
+          ),
+          content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "Adicionar carros",
-                  style: TextStyle(fontSize: 17),
-                ),
-                Divider(
-                  color: Colors.white,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
                 TextField(
                   controller: _manufacturerController,
                   decoration: InputDecoration(
-                      labelText: "Fabricante",
-                      filled: true,
-                      fillColor: Colors.white,
-                      focusColor: Colors.white,
-                      prefixIcon: Icon(Icons.text_fields_outlined),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20))),
+                    labelText: "Fabricante",
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10),
                 TextField(
                   controller: _modelController,
                   decoration: InputDecoration(
-                      labelText: "Modelo",
-                      filled: true,
-                      fillColor: Colors.white,
-                      focusColor: Colors.white,
-                      prefixIcon: Icon(Icons.text_fields_outlined),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20))),
+                    labelText: "Modelo",
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10),
                 TextField(
                   controller: _yearController,
                   decoration: InputDecoration(
-                      labelText: "Ano de fabricação",
-                      filled: true,
-                      fillColor: Colors.white,
-                      focusColor: Colors.white,
-                      prefixIcon: Icon(Icons.text_fields_outlined),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20))),
+                    labelText: "Ano de fabricação",
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10),
                 TextField(
                   controller: _categoryController,
                   decoration: InputDecoration(
-                      labelText: "Categoria",
-                      filled: true,
-                      fillColor: Colors.white,
-                      focusColor: Colors.white,
-                      prefixIcon: Icon(Icons.text_fields_outlined),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20))),
+                    labelText: "Categoria",
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                 ),
-                SizedBox(height: 10),
-                ElevatedButton(
-                    onPressed: () {
-                      if (docId == null) {
-                        _firebaseservice.addCar(
-                            _manufacturerController.text,
-                            _modelController.text,
-                            _yearController.text,
-                            _categoryController.text);
-
-                        _manufacturerController.clear();
-                        _modelController.clear();
-                        _yearController.clear();
-                        _categoryController.clear();
-                      } else {
-                        _firebaseservice.updateTask(
-                            docId,
-                            _manufacturerController.text,
-                            _modelController.text,
-                            _yearController.text,
-                            _categoryController.text);
-                      }
-                    },
-                    child: Text("Salvar"))
               ],
             ),
-          );
-        });
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancelar"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (docId == null) {
+                  _firebaseservice.addCar(
+                    _manufacturerController.text,
+                    _modelController.text,
+                    _yearController.text,
+                    _categoryController.text,
+                  );
+                } else {
+                  _firebaseservice.updateTask(
+                    docId,
+                    _manufacturerController.text,
+                    _modelController.text,
+                    _yearController.text,
+                    _categoryController.text,
+                  );
+                }
+
+                _manufacturerController.clear();
+                _modelController.clear();
+                _yearController.clear();
+                _categoryController.clear();
+
+                Navigator.of(context).pop();
+              },
+              child: Text("Salvar"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -194,8 +201,6 @@ class _HomePageState extends State<HomePage> {
                   String docId = document.id;
                   String carManufacturer = data["manufacturer"];
                   String carModel = data["model"];
-                  String carYear = data["year"];
-                  String carCategory = data["category"];
 
                   return Padding(
                     padding: EdgeInsets.all(16),

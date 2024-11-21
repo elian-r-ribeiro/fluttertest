@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertest/services/authService.dart';
-import 'package:fluttertest/widgets/snack_bar_widget.dart';
 
 class PasswordRecoverPage extends StatefulWidget {
   const PasswordRecoverPage({super.key});
@@ -13,6 +12,27 @@ class _PasswordRecoverPageState extends State<PasswordRecoverPage> {
   AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
+
+  void _showDialog(String title, String message, bool isError) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+          backgroundColor: isError ? Colors.red[100] : Colors.green[100],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,20 +76,21 @@ class _PasswordRecoverPageState extends State<PasswordRecoverPage> {
               padding: const EdgeInsets.all(12),
               child: ElevatedButton(
                 style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Colors.black),
+                  backgroundColor: MaterialStateProperty.all(Colors.black),
                 ),
                 onPressed: () {
-                  _authService.passwordReset(emailController.text).then((erro) {
-                    if (erro != null) {
-                      snackBarWidget(
-                          context: context, title: erro, isError: true);
-                    } else {
-                      snackBarWidget(
-                          context: context,
-                          title: 'Link enviado com sucesso',
-                          isError: false);
-                    }
-                  });
+                  if (_formKey.currentState?.validate() ?? false) {
+                    _authService
+                        .passwordReset(emailController.text)
+                        .then((erro) {
+                      if (erro != null) {
+                        _showDialog('Erro', erro, true);
+                      } else {
+                        _showDialog(
+                            'Sucesso', 'Link enviado com sucesso', false);
+                      }
+                    });
+                  }
                 },
                 child: const Text(
                   'Enviar e-mail',
